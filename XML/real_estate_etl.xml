@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<etl    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.etl.org/etlSchema"
+        xsi:schemaLocation="http://www.etl.org/etlSchema ../schemaAndXML/ETLSchema.xsd">
+
+    <extract>
+        <csv-extract sourceId="S1">
+            <file-path>./datafiles/Sacramentorealestatetransactions1.csv</file-path>
+            <separator>,</separator>
+            <windowsize>20</windowsize>
+        </csv-extract>
+        <csv-extract sourceId="S2">
+            <file-path>./datafiles/Sacramentorealestatetransactions2.csv</file-path>
+            <separator>,</separator>
+            <windowsize>5</windowsize>
+        </csv-extract>
+    </extract>
+
+    <transformations>
+        <mapping>
+            <input inputId="I1" sourceId="S1">latitude</input>
+            <output outputId="O1">latitude</output>
+            <map>
+                <from>#####</from>
+                <to>NaN</to>
+            </map>
+        </mapping>
+        <mapping>
+            <input inputId="I2" sourceId="S1">longitude</input>
+            <output outputId="O2">longitutde</output>
+            <map>
+                <from>#####</from>
+                <to>NaN</to>
+            </map>
+        </mapping>
+        <conversion>
+            <formula>
+                <input inputId="I3" sourceId="S1">price</input>
+                <output outputId="O3">tax_intermediate</output>
+                <expression>( ( @I3 * #0.05 ) * #100 )</expression>
+            </formula>
+            <ceil>
+                <input inputId="I4">O3</input>
+                <output outputId="O4">tax_ceiled</output>
+            </ceil>
+            <formula>
+                <input inputId="I5">O4</input>
+                <output outputId="O5">tax_3_decimal_places</output>
+                <expression>( @I5 / #100 )</expression>
+            </formula>
+
+            <formula>
+                <input inputId="I6">O5</input>
+                <input inputId="I7" sourceId="S1">price</input>
+                <output outputId="O6">total_price</output>
+                <expression>( @I6 + @I7 )</expression>
+            </formula>
+
+            <formula>
+                <input inputId="I8" sourceId="S1">sq__ft</input>
+                <output outputId="O7">sq__m_decimal</output>
+                <expression>( @I8 * #0.093 )</expression>
+            </formula>
+            <floor>
+                <input inputId="I9">O7</input>
+                <output outputId="O8">sq__m</output>                
+            </floor>
+
+        </conversion>
+
+
+        <mapping>
+            <input inputId="I21" sourceId="S2">latitude</input>
+            <output outputId="O21">latitude</output>
+            <map>
+                <from>#####</from>
+                <to>NaN</to>
+            </map>
+        </mapping>
+        <mapping>
+            <input inputId="I22" sourceId="S2">longitude</input>
+            <output outputId="O22">longitutde</output>
+            <map>
+                <from>#####</from>
+                <to>NaN</to>
+            </map>
+        </mapping>
+        <conversion>
+            <formula>
+                <input inputId="I23" sourceId="S2">price</input>
+                <output outputId="O23">tax_intermediate</output>
+                <expression>( ( @I23 * #0.05 ) * #100 )</expression>
+            </formula>
+            <ceil>
+                <input inputId="I24">O23</input>
+                <output outputId="O24">tax_ceiled</output>
+            </ceil>
+            <formula>
+                <input inputId="I25">O24</input>
+                <output outputId="O25">tax_3_decimal_places</output>
+                <expression>( @I25 / #100 )</expression>
+            </formula>
+
+            <formula>
+                <input inputId="I26">O25</input>
+                <input inputId="I27" sourceId="S2">price</input>
+                <output outputId="O26">total_price</output>
+                <expression>( @I26 + @I27 )</expression>
+            </formula>
+            <formula>
+                <input inputId="I28" sourceId="S2">sq__ft</input>
+                <output outputId="O27">sq__m_decimal</output>
+                <expression>( @I28 * #0.093 )</expression>
+            </formula>
+            <floor>
+                <input inputId="I29">O27</input>
+                <output outputId="O28">sq__m</output>                
+            </floor>
+        </conversion>
+
+        <merge>
+            <input inputId="M1_1" sourceId="S1">street</input>
+            <input inputId="M1_2" sourceId="S2">street</input>
+            <output outputId="M1">street</output>
+        </merge>
+        <merge>
+            <input inputId="M2_1" sourceId="S1">city</input>
+            <input inputId="M2_2" sourceId="S2">city</input>
+            <output outputId="M2">city</output>
+        </merge>
+        <merge>
+            <input inputId="M3_1" sourceId="S1">zip</input>
+            <input inputId="M3_2" sourceId="S2">zip</input>
+            <output outputId="M3">zip</output>
+        </merge>
+        <merge>
+            <input inputId="M4_1" sourceId="S1">state</input>
+            <input inputId="M4_2" sourceId="S2">state</input>
+            <output outputId="M4">state</output>
+        </merge>
+        <merge>
+            <input inputId="M5_1" sourceId="S1">beds</input>
+            <input inputId="M5_2" sourceId="S2">beds</input>
+            <output outputId="M5">beds</output>
+        </merge>
+        <merge>
+            <input inputId="M6_1" sourceId="S1">baths</input>
+            <input inputId="M6_2" sourceId="S2">baths</input>
+            <output outputId="M6">baths</output>
+        </merge>
+        <merge>
+            <input inputId="M7_1" sourceId="S1">sq__ft</input>
+            <input inputId="M7_2" sourceId="S2">sq__ft</input>
+            <output outputId="M7">sq__ft</output>
+        </merge>
+        <merge>
+            <input inputId="M8_1" sourceId="S1">type</input>
+            <input inputId="M8_2" sourceId="S2">type</input>
+            <output outputId="M8">type</output>
+        </merge>
+        <merge>
+            <input inputId="M9_1" sourceId="S1">sale_date</input>
+            <input inputId="M9_2" sourceId="S2">sale_date</input>
+            <output outputId="M9">sale_date</output>
+        </merge>
+        <merge>
+            <input inputId="M10_1" sourceId="S1">price</input>
+            <input inputId="M10_2" sourceId="S2">price</input>
+            <output outputId="M10">price</output>
+        </merge>
+        <merge>
+            <input inputId="M11_1" >O5</input>
+            <input inputId="M11_2">O25</input>
+            <output outputId="M11">tax</output>
+        </merge>
+        <merge>
+            <input inputId="M12_1">O6</input>
+            <input inputId="M12_2">O26</input>
+            <output outputId="M12">total_price</output>
+        </merge>
+        <merge>
+            <input inputId="M13_1" >O1</input>
+            <input inputId="M13_2" >O21</input>
+            <output outputId="M13">latitude</output>
+        </merge>
+        <merge>
+            <input inputId="M14_1">O2</input>
+            <input inputId="M14_2">O22</input>
+            <output outputId="M14">longitude</output>
+        </merge>
+        <merge>
+            <input inputId="M15_1">O8</input>
+            <input inputId="M15_2" >O28</input>
+            <output outputId="M15">sq__m</output>
+        </merge>
+    </transformations>
+
+    <load>
+        <db-load>
+            <database>MYSQL</database>
+            <hostname>localhost</hostname>
+            <username>root</username>
+            <password>password</password>
+            <database-name>real_estate_etl</database-name>
+            <table-name>Listing</table-name>
+            <output>
+                <field>
+                    <field-name>street</field-name>
+                    <field-source>M1</field-source>
+                </field>
+                <field>
+                    <field-name>city</field-name>
+                    <field-source>M2</field-source>
+                </field>
+                <field>
+                    <field-name>zip</field-name>
+                    <field-source>M3</field-source>
+                </field>
+                <field>
+                    <field-name>state</field-name>
+                    <field-source>M4</field-source>
+                </field>
+                <field>
+                    <field-name>beds</field-name>
+                    <field-source>M5</field-source>
+                </field>
+                <field>
+                    <field-name>baths</field-name>
+                    <field-source>M6</field-source>
+                </field>
+                <field>
+                    <field-name>sq_ft</field-name>
+                    <field-source>M7</field-source>
+                </field>
+                <field>
+                    <field-name>_type</field-name>
+                    <field-source>M8</field-source>
+                </field>
+                <field>
+                    <field-name>sale_date</field-name>
+                    <field-source>M9</field-source>
+                </field>
+                <field>
+                    <field-name>price</field-name>
+                    <field-source>M10</field-source>
+                </field>
+                <field>
+                    <field-name>tax</field-name>
+                    <field-source>M11</field-source>
+                </field>
+                <field>
+                    <field-name>total_price</field-name>
+                    <field-source>M12</field-source>
+                </field>
+                <field>
+                    <field-name>latitude</field-name>
+                    <field-source>M13</field-source>
+                </field>
+                <field>
+                    <field-name>longitude</field-name>
+                    <field-source>M14</field-source>
+                </field>
+                <field>
+                    <field-name>sq_m</field-name>
+                    <field-source>M15</field-source>
+                </field>
+            </output>
+
+        </db-load>
+    </load>
+
+
+
+</etl>

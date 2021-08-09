@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<etl    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.etl.org/etlSchema"
+        xsi:schemaLocation="http://www.etl.org/etlSchema ../schemaAndXML/ETLSchema.xsd">
+
+    <extract>
+        <csv-extract sourceId="S1">
+            <file-path>./datafiles/Sacramentorealestatetransactions1.csv</file-path>
+            <separator>,</separator>
+            <windowsize>5</windowsize>
+        </csv-extract>
+    </extract>
+
+    <transformations>
+        <mapping>
+            <input inputId="I1" sourceId="S1">latitude</input>
+            <output outputId="O1">latitude</output>
+            <map>
+                <from>#####</from>
+                <to>NaN</to>
+            </map>
+        </mapping>
+        <mapping>
+            <input inputId="I2" sourceId="S1">longitude</input>
+            <output outputId="O2">longitutde</output>
+            <map>
+                <from>#####</from>
+                <to>NaN</to>
+            </map>
+        </mapping>
+        <conversion>
+            <formula>
+                <input inputId="I3" sourceId="S1">price</input>
+                <output outputId="O3">tax_intermediate</output>
+                <expression>( ( @I3 * #0.05 ) * #100 )</expression>
+            </formula>
+            <ceil>
+                <input inputId="I4">O3</input>
+                <output outputId="O4">tax_ceiled</output>
+            </ceil>
+            <formula>
+                <input inputId="I5">O4</input>
+                <output outputId="O5">tax_3_decimal_places</output>
+                <expression>( @I5 / #100 )</expression>
+            </formula>
+
+            <formula>
+                <input inputId="I6">O5</input>
+                <input inputId="I7" sourceId="S1">price</input>
+                <output outputId="O6">total_price</output>
+                <expression>( @I6 + @I7 )</expression>
+            </formula>
+
+            <formula>
+                <input inputId="I8" sourceId="S1">sq__ft</input>
+                <output outputId="O7">sq__m_decimal</output>
+                <expression>( @I8 * #0.093 )</expression>
+            </formula>
+            <floor>
+                <input inputId="I9">O7</input>
+                <output outputId="O8">sq__m</output>                
+            </floor>
+
+        </conversion>
+
+    </transformations>
+
+    <load>
+        <db-load>
+            <database>MYSQL</database>
+            <hostname>localhost</hostname>
+            <username>root</username>
+            <password>password</password>
+            <database-name>real_estate_etl</database-name>
+            <table-name>Listing</table-name>
+            <output>
+                <field sourceId="S1">
+                    <field-name>street</field-name>
+                    <field-source>street</field-source>
+                </field>
+                <field sourceId="S1">
+                    <field-name>city</field-name>
+                    <field-source>city</field-source>
+                </field>
+                <field sourceId="S1">
+                    <field-name>zip</field-name>
+                    <field-source>zip</field-source>
+                </field>
+                <field sourceId="S1">
+                    <field-name>state</field-name>
+                    <field-source>state</field-source>
+                </field>
+                <field sourceId="S1">
+                    <field-name>beds</field-name>
+                    <field-source>beds</field-source>
+                </field>
+                <field sourceId="S1">
+                    <field-name>baths</field-name>
+                    <field-source>baths</field-source>
+                </field>
+                <field sourceId="S1">
+                    <field-name>sq_ft</field-name>
+                    <field-source>sq__ft</field-source>
+                </field>
+                <field sourceId="S1">
+                    <field-name>_type</field-name>
+                    <field-source>type</field-source>
+                </field>
+                <field sourceId="S1">
+                    <field-name>sale_date</field-name>
+                    <field-source>sale_date</field-source>
+                </field>
+                <field sourceId="S1">
+                    <field-name>price</field-name>
+                    <field-source>price</field-source>
+                </field>
+                <field>
+                    <field-name>tax</field-name>
+                    <field-source>O5</field-source>
+                </field>
+                <field>
+                    <field-name>total_price</field-name>
+                    <field-source>O6</field-source>
+                </field>
+                <field>
+                    <field-name>latitude</field-name>
+                    <field-source>O1</field-source>
+                </field>
+                <field>
+                    <field-name>longitude</field-name>
+                    <field-source>O2</field-source>
+                </field>
+                <field>
+                    <field-name>sq_m</field-name>
+                    <field-source>O8</field-source>
+                </field>
+            </output>
+
+        </db-load>
+    </load>
+
+
+
+</etl>
